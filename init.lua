@@ -18,3 +18,6 @@ local opts = {}
 require("vim-options")
 require("lazy").setup("plugins")
 
+-- Make the statusline span the entire width of the editor 
+vim.opt.laststatus = 3
+
