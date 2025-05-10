@@ -46,4 +46,3 @@ return {
     -- { "<C-n>",            function() Snacks.explorer() end,           desc = "Explorer" },
   }
 }
-
