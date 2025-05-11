@@ -15,3 +15,5 @@ vim.keymap.set("n", "<c-l>", ":wincmd l<CR>")
 vim.keymap.set("n", "<leader>h", ":nohlsearch<CR>")
 vim.wo.number = true
 
+-- Use system clipboard as the default register
+vim.api.nvim_set_option("clipboard", "unnamed")
