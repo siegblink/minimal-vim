@@ -33,6 +33,13 @@ return {
     scroll = { enabled = false },
     statuscolumn = { enabled = true },
     words = { enabled = true },
+    terminal = { 
+      enabled = true,
+      win = {
+        position = "right",
+        width = 0.5,
+      }
+    },
   },
   keys = {
     { "<leader>sf",       function() Snacks.scratch() end,            desc = "Toggle Scratch Buffer" },
@@ -43,6 +50,7 @@ return {
     { "<leader><leader>", function() Snacks.picker.recent() end,      desc = "Recent Files" },
     { "<leader>fb",       function() Snacks.picker.buffers() end,     desc = "Buffers" },
     { "<leader>fg",       function() Snacks.picker.grep() end,        desc = "Grep Files" },
+    { "<leader>t",        function() Snacks.terminal() end,           desc = "Toggle Terminal" },
     -- { "<C-n>",            function() Snacks.explorer() end,           desc = "Explorer" },
   }
 }
