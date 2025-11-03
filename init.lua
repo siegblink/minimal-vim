@@ -21,3 +21,6 @@ require("lazy").setup("plugins")
 -- Make the statusline span the entire width of the editor 
 vim.opt.laststatus = 3
 
+-- Synchronize unnamed register with the system's clipboard register
+vim.opt.clipboard = "unnamedplus"
+
