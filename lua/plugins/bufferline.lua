@@ -9,6 +9,14 @@ return {
 				custom_filter = function(buf_number)
 					return vim.fn.bufname(buf_number) ~= ""
 				end,
+				close_command = function(_)
+					local buffers = vim.fn.getbufinfo({ buflisted = 1 })
+					if #buffers > 1 then
+						vim.cmd("bp|bd #")
+					else
+						vim.cmd("bd")
+					end
+				end,
 			},
 		})
 		vim.keymap.set("n", "<Tab>", ":BufferLineCycleNext<CR>", { silent = true })
