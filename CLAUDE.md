@@ -33,9 +33,10 @@ Key plugins configured:
 
 Configured LSPs via Mason:
 - lua_ls (Lua)
-- ts_ls (TypeScript/JavaScript)
+- ts_ls (TypeScript/JavaScript) — diagnostics intentionally disabled for JS files (not TS)
 - html, cssls (Web)
 - pylsp (Python)
+- dartls (Dart/Flutter) — managed by flutter-tools, not Mason directly
 
 ## Formatters
 
@@ -46,6 +47,11 @@ Configured via none-ls:
 
 ## File Locations
 
-- All configuration lives in `/Users/sieg/.config/nvim/`
+- All configuration lives in `~/.config/nvim/` (`/home/<user>` on Linux, `/Users/<user>` on macOS)
 - Plugin configs are in `lua/plugins/[plugin-name].lua`
 - Core Vim options are in `lua/vim-options.lua`
+
+## Known Quirks
+
+- **Treesitter**: highlight queries for `markdown` and `html` are disabled in `treesitter.lua` — intentional workaround for a nil-node crash on Neovim 0.12; do not remove.
+- **dartls color preview**: inline color swatches are explicitly disabled via `vim.lsp.document_color.enable(false)` in `flutter-tools.lua`; do not re-enable.
