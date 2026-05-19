@@ -28,6 +28,13 @@ return {
 			}
 			vim.lsp.config.ts_ls = {
 				capabilities = capabilities,
+				on_attach = function(_, bufnr)
+					local js_filetypes = { javascript = true, javascriptreact = true }
+
+					if js_filetypes[vim.bo[bufnr].filetype] then
+						vim.diagnostic.enable(false, { bufnr = bufnr })
+					end
+				end,
 			}
 			vim.lsp.config.lua_ls = {
 				capabilities = capabilities,
