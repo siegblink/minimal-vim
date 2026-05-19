@@ -7,7 +7,6 @@ return {
 			sources = {
 				null_ls.builtins.formatting.stylua,
 				null_ls.builtins.formatting.black,
-				null_ls.builtins.formatting.dart_format,
 				null_ls.builtins.formatting.prettier.with({
 					filetypes = { "json", "javascript", "javascriptreact", "typescript", "typescriptreact" },
 				}),

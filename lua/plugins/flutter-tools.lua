@@ -10,6 +10,13 @@ return {
 			lsp = {
 				capabilities = capabilities,
 			},
+			debugger = {
+				enabled = true,
+				run_via_dap = true,
+			},
+			closing_tags = { enabled = true },
+			widget_guides = { enabled = true },
+			dev_log = { enabled = true },
 		})
 
 		vim.api.nvim_create_autocmd("LspAttach", {
