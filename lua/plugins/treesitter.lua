@@ -14,7 +14,7 @@ return {
       --   "bash",
       -- },
       auto_install = true,
-      highlight = { enable = true, disable = { "markdown", "markdown_inline" } },
+      highlight = { enable = true, disable = { "markdown", "markdown_inline", "html" } },
       indent = { enable = true },
     })
   end,
