@@ -18,7 +18,7 @@ vim.keymap.set("n", "<c-l>", ":wincmd l<CR>")
 vim.keymap.set("n", "<leader>h", ":nohlsearch<CR>")
 
 -- Terminal keybindings
-vim.keymap.set("n", "<leader>th", ":botright split | terminal<CR>")
+vim.keymap.set("n", "<leader>T", ":botright split | terminal<CR>")
 vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
 vim.wo.number = true
 
