@@ -27,6 +27,14 @@ return {
     indent = { enabled = true, scope = { treesitter = { enabled = false } } },
     input = { enabled = true },
     git = { enabled = true },
+    lazygit = {
+      win = {
+        position = "float",
+        border = "rounded",
+        width = 0.9,
+        height = 0.9,
+      },
+    },
     picker = { enabled = true },
     notifier = { enabled = true },
     quickfile = { enabled = true, exclude = { "latex", "markdown" } },
