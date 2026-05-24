@@ -19,7 +19,7 @@ vim.keymap.set("n", "<leader>h", ":nohlsearch<CR>")
 
 -- Terminal keybindings
 vim.keymap.set("n", "<leader>T", ":botright split | terminal<CR>")
-vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
+vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>")
 vim.wo.number = true
 
 -- Use system clipboard as the default register

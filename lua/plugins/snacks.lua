@@ -42,12 +42,14 @@ return {
     scope = { enabled = true, treesitter = { enabled = false } },
     statuscolumn = { enabled = true },
     words = { enabled = true },
-    terminal = { 
+    terminal = {
       enabled = true,
       win = {
-        position = "right",
-        width = 0.5,
-      }
+        position = "float",
+        border = "rounded",
+        width = 0.9,
+        height = 0.9,
+      },
     },
   },
   keys = {
