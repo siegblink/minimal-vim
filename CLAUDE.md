@@ -54,4 +54,4 @@ Configured via none-ls:
 ## Known Quirks
 
 - **Treesitter**: highlight queries for `markdown` and `html` are disabled in `treesitter.lua` — intentional workaround for a nil-node crash on Neovim 0.12; do not remove.
-- **dartls color preview**: inline color swatches are explicitly disabled via `vim.lsp.document_color.enable(false)` in `flutter-tools.lua`; do not re-enable.
+- **LSP color preview**: inline color swatches are globally disabled via `vim.lsp.document_color.enable(false)` in `vim-options.lua`; do not re-enable for any LSP.

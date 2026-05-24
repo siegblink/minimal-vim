@@ -22,3 +22,6 @@ vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>")
 
 -- Use system clipboard as the default register
 vim.opt.clipboard = "unnamed,unnamedplus"
+
+-- Disable LSP inline color swatches globally (noisy in non-CSS files)
+vim.lsp.document_color.enable(false)
