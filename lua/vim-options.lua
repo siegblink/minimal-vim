@@ -18,9 +18,7 @@ vim.keymap.set("n", "<c-l>", ":wincmd l<CR>")
 vim.keymap.set("n", "<leader>h", ":nohlsearch<CR>")
 
 -- Terminal keybindings
-vim.keymap.set("n", "<leader>T", ":botright split | terminal<CR>")
 vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>")
-vim.wo.number = true
 
 -- Use system clipboard as the default register
-vim.api.nvim_set_option("clipboard", "unnamed")
+vim.opt.clipboard = "unnamedplus"
