@@ -33,6 +33,12 @@ return {
     })
 
     vim.keymap.set('n', '<C-n>', ':Neotree filesystem toggle reveal left <CR>')
+
+    local function set_neotree_hl()
+      vim.api.nvim_set_hl(0, "NeoTreeCursorLine", { bg = "#1d3b53", bold = true })
+    end
+    set_neotree_hl()
+    vim.api.nvim_create_autocmd("ColorScheme", { callback = set_neotree_hl })
   end
 }
 
