@@ -15,6 +15,10 @@ return {
   config = function()
     -- Display "CmdLine" and "Popupmenu" together.
     require("noice").setup({
+      lsp = {
+        -- Use Neovim's native hover handler so our vim.lsp.handlers border config applies
+        hover = { enabled = false },
+      },
       views = {
         cmdline_popup = {
           position = {

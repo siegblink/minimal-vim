@@ -34,3 +34,14 @@ vim.opt.clipboard = "unnamed,unnamedplus"
 
 -- Disable LSP inline color swatches globally (noisy in non-CSS files)
 vim.lsp.document_color.enable(false)
+
+-- Neovim 0.12 + archived nvim-treesitter: query_predicates.lua crashes when
+-- treesitter tries to resolve injections in LSP hover buffers (nil-node from
+-- match[id] now being a list). Stop treesitter on the buffer right after
+-- stylize_markdown starts it, before the first render triggers the crash.
+local _orig_stylize = vim.lsp.util.stylize_markdown
+vim.lsp.util.stylize_markdown = function(bufnr, contents, opts)
+  local result = _orig_stylize(bufnr, contents, opts)
+  pcall(vim.treesitter.stop, bufnr)
+  return result
+end
