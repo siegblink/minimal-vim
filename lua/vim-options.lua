@@ -20,6 +20,15 @@ vim.keymap.set("n", "<leader>h", ":nohlsearch<CR>")
 -- Terminal keybindings
 vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>")
 
+-- Auto-enter terminal mode whenever a terminal buffer is focused
+-- (snacks terminal toggle re-shows the buffer without calling startinsert)
+vim.api.nvim_create_autocmd("BufEnter", {
+  pattern = "term://*",
+  callback = function()
+    vim.cmd("startinsert")
+  end,
+})
+
 -- Use system clipboard as the default register
 vim.opt.clipboard = "unnamed,unnamedplus"
 
