@@ -49,7 +49,9 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-local opts = {}
+local opts = {
+  rocks = { enabled = false },
+}
 
 -- Initiliaze all custom options and plugins
 require("vim-options")
