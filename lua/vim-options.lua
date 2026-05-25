@@ -33,7 +33,10 @@ vim.api.nvim_create_autocmd("BufEnter", {
 vim.opt.clipboard = "unnamed,unnamedplus"
 
 -- Disable LSP inline color swatches globally (noisy in non-CSS files)
-vim.lsp.document_color.enable(false)
+-- document_color was added in Neovim 0.12; guard for older builds
+if vim.lsp.document_color then
+  vim.lsp.document_color.enable(false)
+end
 
 -- Neovim 0.12 + archived nvim-treesitter: query_predicates.lua crashes when
 -- treesitter tries to resolve injections in LSP hover buffers (nil-node from
