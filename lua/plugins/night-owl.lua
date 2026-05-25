@@ -13,6 +13,14 @@ return {
 
     -- Subtle border for full-screen floats (terminal, lazygit) — stays on editor background
     vim.api.nvim_set_hl(0, "TermFloat", { bg = "#011627", fg = "#637777" })
+
+    -- Lazy.nvim and Mason inherit NormalFloat, which would make them bright blue.
+    -- Pin each to the dark editor background so only LSP/diagnostic floats get the
+    -- elevated colour.
+    vim.api.nvim_set_hl(0, "LazyNormal",      { bg = "#011627", fg = "#d6deeb" })
+    vim.api.nvim_set_hl(0, "LazyFloat",       { bg = "#011627", fg = "#d6deeb" })
+    vim.api.nvim_set_hl(0, "LazyFloatBorder", { bg = "#011627", fg = "#637777" })
+    vim.api.nvim_set_hl(0, "MasonNormal",     { bg = "#011627", fg = "#d6deeb" })
   end,
 }
 
