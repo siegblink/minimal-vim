@@ -53,5 +53,10 @@ Configured via none-ls:
 
 ## Known Quirks
 
-- **Treesitter**: highlight queries for `markdown` and `html` are disabled in `treesitter.lua` — intentional workaround for a nil-node crash on Neovim 0.12; do not remove.
+- **Treesitter markdown (multi-layer fix)**: Neovim 0.12 introduced several treesitter crashes for markdown. Three layers of fix are in place — do not remove any of them:
+  1. `treesitter.lua` — `highlight.disable = { "markdown", "markdown_inline" }` blocks nvim-treesitter from activating treesitter for markdown (also kept for `html`).
+  2. `after/ftplugin/markdown.lua` — calls `vim.treesitter.stop()` to undo Neovim 0.12's new built-in `ftplugin/markdown.lua` which calls `vim.treesitter.start()` unconditionally, bypassing the nvim-treesitter disable list.
+  3. `snacks.lua` — `scope.treesitter.enabled = false`, `indent.scope.treesitter.enabled = false`, and `quickfile.exclude = { "latex", "markdown" }` prevent snacks from activating treesitter on markdown via its own code paths.
+- **Treesitter LSP hover fix**: `vim-options.lua` monkey-patches `vim.lsp.util.stylize_markdown` to call `vim.treesitter.stop(bufnr)` immediately after, preventing the hover buffer's markdown treesitter from triggering `query_predicates.lua` crashes. `noice.lua` has `lsp.hover.enabled = false` so the native hover handler (which respects this patch) is used instead of noice's.
+- **`query_predicates.lua` patch (NOT in git)**: `nvim-treesitter` was archived on 2026-04-03 and will not be updated. Neovim 0.12 changed `match[id]` in query predicates/directives from a single `TSNode` to a list `{ TSNode }`. The file `~/.local/share/nvim/lazy/nvim-treesitter/lua/nvim-treesitter/query_predicates.lua` must be patched manually on each machine: add an `unwrap_node` helper after the `opts` line, then wrap all 6 `match[id]` read sites with `unwrap_node(...)`. See the project memory for details.
 - **LSP color preview**: inline color swatches are globally disabled via `vim.lsp.document_color.enable(false)` in `vim-options.lua`; do not re-enable for any LSP.
