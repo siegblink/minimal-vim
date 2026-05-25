@@ -46,23 +46,26 @@ return {
 			-- Enable all configured servers
 			vim.lsp.enable({ "html", "cssls", "ts_ls", "lua_ls", "pylsp" })
 
-			-- Bordered floating window for signature help (hover border is set per-call via K keymap)
+			local lsp_float_opts = {
+				border = "rounded",
+				winhighlight = "NormalFloat:LspFloat,FloatBorder:LspFloatBorder,FloatTitle:LspFloatTitle",
+			}
+
 			vim.lsp.handlers["textDocument/signatureHelp"] = function(err, result, ctx, config)
-				return vim.lsp.handlers.signature_help(err, result, ctx, vim.tbl_extend("force", config or {}, { border = "rounded" }))
+				return vim.lsp.handlers.signature_help(err, result, ctx, vim.tbl_extend("force", config or {}, lsp_float_opts))
 			end
 
 			-- Bordered, sourced diagnostic floats (<leader>e)
 			vim.diagnostic.config({
-				float = {
-					border = "rounded",
+				float = vim.tbl_extend("force", lsp_float_opts, {
 					source = true,
 					header = "",
 					prefix = "",
-				},
+				}),
 			})
 
 			vim.keymap.set("n", "K", function()
-				vim.lsp.buf.hover({ border = "rounded", max_width = 80, max_height = 20 })
+				vim.lsp.buf.hover(vim.tbl_extend("force", lsp_float_opts, { max_width = 80, max_height = 20 }))
 			end, {})
 			vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, {})
 			vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references, {})
