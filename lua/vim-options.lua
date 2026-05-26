@@ -48,3 +48,15 @@ vim.lsp.util.stylize_markdown = function(bufnr, contents, opts)
   pcall(vim.treesitter.stop, bufnr)
   return result
 end
+
+-- Neovim 0.12: open_floating_preview silently drops `winhighlight` from opts
+-- because it is a window-local option, not an nvim_open_win config key.
+-- Wrap it to apply winhighlight to the window after creation.
+local _orig_open_floating = vim.lsp.util.open_floating_preview
+vim.lsp.util.open_floating_preview = function(contents, syntax, opts)
+  local bufnr, winid = _orig_open_floating(contents, syntax, opts)
+  if winid and opts and opts.winhighlight then
+    vim.wo[winid].winhighlight = opts.winhighlight
+  end
+  return bufnr, winid
+end
