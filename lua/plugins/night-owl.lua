@@ -15,10 +15,8 @@ return {
     -- for the border colour via winhighlight in snacks.lua
     vim.api.nvim_set_hl(0, "TermFloat", { bg = "#011627", fg = "#637777" })
 
-    -- LSP hover / signature / diagnostic floats opt in to the elevated blue background
-    vim.api.nvim_set_hl(0, "LspFloat",       { bg = "#1d3b53", fg = "#d6deeb" })
-    vim.api.nvim_set_hl(0, "LspFloatBorder", { bg = "#1d3b53", fg = "#82aaff" })
-    vim.api.nvim_set_hl(0, "LspFloatTitle",  { bg = "#1d3b53", fg = "#7fdbca", bold = true })
+    -- Bright border for LSP and completion floats — same dark bg, visible blue fg
+    vim.api.nvim_set_hl(0, "LspFloatBorder", { bg = "#011627", fg = "#82aaff" })
   end,
 }
 

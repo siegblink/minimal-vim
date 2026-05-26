@@ -48,7 +48,7 @@ return {
 
 			local lsp_float_opts = {
 				border = "rounded",
-				winhighlight = "NormalFloat:LspFloat,FloatBorder:LspFloatBorder,FloatTitle:LspFloatTitle",
+				winhighlight = "NormalFloat:NormalFloat,FloatBorder:LspFloatBorder,FloatTitle:FloatTitle",
 			}
 
 			vim.lsp.handlers["textDocument/signatureHelp"] = function(err, result, ctx, config)
