@@ -42,10 +42,10 @@ return {
 						vim.keymap.set("n", lhs, rust(cmd), { buffer = bufnr, desc = desc })
 					end
 
-					vim.keymap.set("n", "K", function()
-						vim.cmd.RustLsp({ "hover", "actions" })
-					end, { buffer = bufnr, desc = "Rust: hover actions" })
-
+					-- NOTE: `K` is intentionally NOT overridden here. The global K in
+					-- lsp-config.lua (bordered, LspFloatBorder, capped 80x20) handles
+					-- rust-analyzer hover too. rustaceanvim's own hover is undecorated
+					-- and unconstrained, so we let the configured one win.
 					map("<leader>ca", "codeAction", "Rust: code action")
 					map("<leader>rr", "runnables", "Rust: runnables")
 					map("<leader>rt", "testables", "Rust: testables")
