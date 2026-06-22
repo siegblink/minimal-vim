@@ -16,7 +16,9 @@ return {
 						check = { command = "clippy" },
 						-- Inlay hints: rust-analyzer side (display is toggled in on_attach)
 						inlayHints = { enable = true },
-						cargo = { allFeatures = true },
+						-- targetDir = true puts rust-analyzer's checks in target/rust-analyzer
+						-- so clippy-on-save doesn't fight `cargo run`/build over the target lock.
+						cargo = { allFeatures = true, targetDir = true },
 					},
 				},
 				on_attach = function(client, bufnr)
