@@ -20,6 +20,7 @@ Key plugins configured:
 - LSP setup via Mason and nvim-lspconfig (`lsp-config.lua`)
 - Formatting via none-ls with stylua, black, and prettier (`none-ls.lua`)
 - DAP debugging with nvim-dap and dapui (`debugging.lua`)
+- Rust development via rustaceanvim + crates.nvim (`rustaceanvim.lua`, `crates.lua`)
 - File explorer via neo-tree (`neo-tree.lua`)
 - Git integration via gitsigns (`git-signs.lua`)
 - Auto-completion via nvim-cmp (`completions.lua`)
@@ -37,6 +38,7 @@ Configured LSPs via Mason:
 - html, cssls (Web)
 - pylsp (Python)
 - dartls (Dart/Flutter) — managed by flutter-tools, not Mason directly
+- rust-analyzer (Rust) — managed by **rustaceanvim**, not Mason/lspconfig. Uses the rustup binary at `~/.cargo/bin/rust-analyzer`. Intentionally NOT added to `vim.lsp.enable({...})` in `lsp-config.lua` to avoid a duplicate LSP client.
 
 ## Formatters
 
@@ -44,6 +46,7 @@ Configured via none-ls:
 - stylua (Lua)
 - black (Python)
 - prettier (JSON, JS/TS/JSX/TSX)
+- rustfmt (Rust) — via rust-analyzer (not none-ls). Runs automatically on save for `.rs` files only (buffer-local `BufWritePre` autocmd in `rustaceanvim.lua`).
 
 ## File Locations
 
@@ -62,3 +65,5 @@ Configured via none-ls:
 - **LSP color preview**: inline color swatches are globally disabled via `vim.lsp.document_color.enable(false)` in `vim-options.lua`; do not re-enable for any LSP.
 - **`open_floating_preview` winhighlight patch**: Neovim 0.12's `vim.lsp.util.open_floating_preview` silently drops `winhighlight` from opts — it is a `vim.wo` option set post-creation, not an `nvim_open_win` config key. `vim-options.lua` wraps the function to apply `opts.winhighlight` to the window after creation. Do not remove this patch or the hover/diagnostic floats will lose their `LspFloatBorder` styling.
 - **`query_predicates.lua` patch (committed into plugin repo)**: `nvim-treesitter` was archived on 2026-04-03. Neovim 0.12 changed `match[id]` from a single `TSNode` to a list `{ TSNode }`. The patch (adding `unwrap_node` and wrapping 6 call sites) is committed directly into `~/.local/share/nvim/lazy/nvim-treesitter/` as a local git commit so Lazy does not see a dirty working tree. On a fresh machine, re-apply the patch and commit it into the plugin repo again.
+- **Rust toolchain components (NOT in git)**: rustaceanvim uses the rustup-managed `rust-analyzer`. The component must be installed: `rustup component add rust-analyzer`. If only the `~/.cargo/bin/rust-analyzer` proxy shim exists without the component, it errors with "Unknown binary 'rust-analyzer' in official toolchain" and the LSP silently fails to attach. Per-machine; not tracked in git.
+- **Rust debugging (codelldb, NOT in git)**: Step debugging uses the `codelldb` adapter, installed via `:MasonInstall codelldb`. It is an external binary, not tracked in git, so it must be installed once per machine. rustaceanvim auto-detects it from Mason's path (`~/.local/share/nvim/mason/bin/codelldb`); no adapter config is needed.

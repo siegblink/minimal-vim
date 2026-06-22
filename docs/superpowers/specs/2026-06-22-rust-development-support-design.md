@@ -12,9 +12,10 @@ run/test under cursor, step debugging, dependency management).
 
 ## Context (existing environment)
 
-- Toolchain already installed via **rustup**: `cargo` 1.96, `rustc` 1.96,
-  `rust-analyzer` (at `~/.cargo/bin`, on PATH), `rustfmt`, `clippy`, `rust-src`.
-  → No language-server install needed; we use the rustup binary, not Mason's.
+- Toolchain installed via **rustup**: `cargo` 1.96, `rustc` 1.96, `rustfmt`,
+  `clippy`, `rust-src`. NOTE: the `rust-analyzer` *proxy* was on PATH but the
+  component itself was missing — installed during implementation via
+  `rustup component add rust-analyzer`. We use the rustup binary, not Mason's.
 - Missing only the **debug adapter** (`codelldb`).
 - Config is modular: `lua/plugins/<name>.lua`, Lazy.nvim, new-style
   `vim.lsp.config`/`vim.lsp.enable` for existing LSPs, `nvim-cmp` completion,
