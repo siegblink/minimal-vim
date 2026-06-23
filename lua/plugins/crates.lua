@@ -4,10 +4,34 @@ return {
 	event = { "BufRead Cargo.toml" },
 	config = function()
 		local crates = require("crates")
+
+		-- Bordered floating popups that match the styled LSP hover (K). Mirrors
+		-- lsp_float_opts in lsp-config.lua: rounded border + the blue LspFloatBorder
+		-- highlight. crates.nvim has no winhighlight option for its popup window, so
+		-- we apply it ourselves below once the window opens.
+		local hover_winhighlight = "NormalFloat:NormalFloat,FloatBorder:LspFloatBorder,FloatTitle:FloatTitle"
+
 		crates.setup({
 			completion = {
 				cmp = { enabled = true },
 			},
+			popup = {
+				border = "rounded",
+			},
+		})
+
+		-- crates sets filetype "crates.nvim" on the popup buffer *before* it opens
+		-- the window, so the window doesn't exist yet when FileType fires — defer a
+		-- tick, then style whichever window ends up showing the popup buffer.
+		vim.api.nvim_create_autocmd("FileType", {
+			pattern = "crates.nvim",
+			callback = function(ev)
+				vim.schedule(function()
+					for _, win in ipairs(vim.fn.win_findbuf(ev.buf)) do
+						vim.wo[win].winhighlight = hover_winhighlight
+					end
+				end)
+			end,
 		})
 
 		local function set_keymaps(buf)
