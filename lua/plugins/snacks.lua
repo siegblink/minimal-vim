@@ -1,3 +1,26 @@
+-- Snacks' auto_close keeps a terminal float OPEN when its process exits with a
+-- non-zero status (it shows an error notification instead), so failed output
+-- stays visible. For the interactive <leader>t shell that backfires: a bare
+-- `exit` inherits the previous command's exit code, so quitting after any
+-- failed command would leave the float stuck on "[Process exited 1]". Disable
+-- snacks' status-gated handler for this terminal and close it unconditionally.
+local function toggle_terminal()
+  Snacks.terminal(nil, {
+    auto_close = false,
+    win = {
+      on_buf = function(self)
+        vim.api.nvim_create_autocmd("TermClose", {
+          buffer = self.buf,
+          callback = function()
+            self:close()
+            vim.cmd.checktime()
+          end,
+        })
+      end,
+    },
+  })
+end
+
 return {
   "folke/snacks.nvim",
   dependencies = {
@@ -63,7 +86,7 @@ return {
     { "<leader><leader>", function() Snacks.picker.recent() end,      desc = "Recent Files" },
     { "<leader>fb",       function() Snacks.picker.buffers() end,     desc = "Buffers" },
     { "<leader>fg",       function() Snacks.picker.grep() end,        desc = "Grep Files" },
-    { "<leader>t",        function() Snacks.terminal() end,           desc = "Toggle Terminal" },
+    { "<leader>t",        toggle_terminal,                            desc = "Toggle Terminal" },
     -- { "<C-n>",            function() Snacks.explorer() end,           desc = "Explorer" },
   }
 }
