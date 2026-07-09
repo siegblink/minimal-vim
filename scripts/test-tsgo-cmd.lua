@@ -1,5 +1,6 @@
 -- Tests for lua/tsgo-cmd.lua. Run: nvim -l scripts/test-tsgo-cmd.lua
-vim.opt.rtp:prepend(vim.fn.stdpath("config"))
+local script_path = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p")
+vim.opt.rtp:prepend(vim.fs.dirname(vim.fs.dirname(script_path)))
 
 local ok_mod, tsgo_cmd = pcall(require, "tsgo-cmd")
 if not ok_mod then
@@ -54,6 +55,14 @@ check("ts5 project falls back to global tsgo", tsgo_cmd.resolve(r2), { "tsgo", "
 -- 3. Preview package installed locally: local tsgo wins over global.
 local r3 = fixture({ ts_version = "5.9.3", bins = { "tsc", "tsgo" } })
 check("local preview tsgo preferred", tsgo_cmd.resolve(r3), { r3 .. "/node_modules/.bin/tsgo", "--lsp", "--stdio" })
+
+-- 3b. Both stable TS7 tsc and preview tsgo present: stable tsc wins.
+local r3b = fixture({ ts_version = "7.0.2", bins = { "tsc", "tsgo" } })
+check(
+	"stable tsc beats local preview tsgo",
+	tsgo_cmd.resolve(r3b),
+	{ r3b .. "/node_modules/.bin/tsc", "--lsp", "--stdio" }
+)
 
 -- 4. typescript v7 in package.json but no executable .bin/tsc: global fallback.
 local r4 = fixture({ ts_version = "7.0.2", bins = {} })
