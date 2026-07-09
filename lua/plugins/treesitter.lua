@@ -1,9 +1,9 @@
 return {
-  "nvim-treesitter/nvim-treesitter",
-  -- Archived 2026-04-03; pin so lazy never tries to update and clobber the
-  -- query_predicates.lua patch committed locally in the plugin's git repo.
-  pin = true,
-  build = ":TSUpdate",
+  -- Archived upstream 2026-04-03; vendored into the config repo with the
+  -- Neovim 0.12 query_predicates.lua patch applied. As a dir= local plugin,
+  -- lazy never fetches it and it stays out of lazy-lock.json (the per-machine
+  -- patch commit hashes made the lockfile ping-pong between machines).
+  dir = vim.fn.stdpath("config") .. "/vendor/nvim-treesitter",
   config = function()
     local config = require("nvim-treesitter.configs")
     config.setup({
