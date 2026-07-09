@@ -26,14 +26,11 @@ return {
 			vim.lsp.config.cssls = {
 				capabilities = capabilities,
 			}
-			vim.lsp.config.ts_ls = {
+			vim.lsp.config.tsgo = {
 				capabilities = capabilities,
-				on_attach = function(_, bufnr)
-					local js_filetypes = { javascript = true, javascriptreact = true }
-
-					if js_filetypes[vim.bo[bufnr].filetype] then
-						vim.diagnostic.enable(false, { bufnr = bufnr })
-					end
+				cmd = function(dispatchers, config)
+					local argv = require("tsgo-cmd").resolve((config or {}).root_dir)
+					return vim.lsp.rpc.start(argv, dispatchers)
 				end,
 			}
 			vim.lsp.config.lua_ls = {
@@ -44,7 +41,7 @@ return {
 			}
 
 			-- Enable all configured servers
-			vim.lsp.enable({ "html", "cssls", "ts_ls", "lua_ls", "pylsp" })
+			vim.lsp.enable({ "html", "cssls", "tsgo", "lua_ls", "pylsp" })
 
 			local lsp_float_opts = {
 				border = "rounded",
@@ -52,7 +49,12 @@ return {
 			}
 
 			vim.lsp.handlers["textDocument/signatureHelp"] = function(err, result, ctx, config)
-				return vim.lsp.handlers.signature_help(err, result, ctx, vim.tbl_extend("force", config or {}, lsp_float_opts))
+				return vim.lsp.handlers.signature_help(
+					err,
+					result,
+					ctx,
+					vim.tbl_extend("force", config or {}, lsp_float_opts)
+				)
 			end
 
 			-- Bordered, sourced diagnostic floats (<leader>e)
