@@ -57,6 +57,11 @@ local opts = {
 require("vim-options")
 require("lazy").setup("plugins")
 
+-- Light/dark switching. Must run after lazy.setup so both colourschemes are on
+-- the runtimepath; it picks the initial mode from the macOS appearance and
+-- registers :Theme plus the FocusGained follow.
+require("theme").setup()
+
 -- Make the statusline span the entire width of the editor 
 vim.opt.laststatus = 3
 
