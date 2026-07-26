@@ -27,7 +27,7 @@ Key plugins configured:
 - Syntax highlighting via treesitter (`treesitter.lua`; plugin vendored at `vendor/nvim-treesitter/`)
 - Status line via lualine (`lualine.lua`)
 - UI enhancements via noice and snacks (`noice.lua`, `snacks.lua`)
-- Colorscheme: night-owl (`night-owl.lua`)
+- Colorscheme: light/dark pair driven by `lua/theme.lua` — night-owl (`night-owl.lua`) for dark, catppuccin-latte retuned (`catppuccin.lua`) for light. See "Theme switching" below.
 - Auto-pairs and commenting (`autopairs.lua`, `comment.lua`)
 
 ## Language Servers
@@ -53,6 +53,16 @@ Configured via none-ls:
 - All configuration lives in `~/.config/nvim/` (`/home/<user>` on Linux, `/Users/<user>` on macOS)
 - Plugin configs are in `lua/plugins/[plugin-name].lua`
 - Core Vim options are in `lua/vim-options.lua`
+
+## Theme switching
+
+`lua/theme.lua` is the single owner of every mode-dependent colour. `night-owl.lua`, `bufferline.lua` and `neo-tree.lua` deliberately contain **no** hardcoded hexes — theme.lua sets those groups on every `ColorScheme` event, so nothing goes stale on switch. Add new hand-set colours to `M.palette`, never inline in a plugin file.
+
+- `:Theme light|dark|toggle|system`, `<leader>tt`. `~/.scripts/theme` flips macOS appearance, `delta.features` (so lazygit's diffs follow) and any running Neovim together.
+- Tests: `nvim --headless -c 'luafile scripts/test-theme.lua'`. **Not** `nvim -l` — that skips `init.lua`, so lazy never runs and the colourschemes aren't on the runtimepath (the test guards against this and says so).
+- **sync() follows the system only when the system itself changed** (`M._system` holds the last observed value), and `M._gen` invalidates a sync callback that raced with a manual switch. Both exist because of a real bug: the first version applied the system mode whenever it differed from the editor's mode, so any `FocusGained` — or the startup `sync()` still in flight — silently undid a manual `:Theme toggle`. Don't "simplify" that back to a plain difference check.
+- `apply()` sets `vim.g.colors_name` by hand: night-owl.nvim never sets it, which left lualine's `auto` theme unable to find the night-owl lualine theme it ships after any switch away from catppuccin. It also re-runs `lualine.setup()` because lualine resolves `auto` once, at setup.
+- Catppuccin's colour overrides are **not** cosmetic taste. Stock latte fails WCAG AA on 16 of 20 text colours against this background (comments 2.33:1). Each is hue-preserved and darkened *proportionally* — original contrast rank remapped onto [4.5, 7.2]. A flat 4.5 floor was tried and collapsed overlay0/1/2 + subtext0 into one grey and made teal/sapphire/sky near-identical.
 
 ## Known Quirks
 

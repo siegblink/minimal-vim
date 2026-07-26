@@ -123,6 +123,7 @@ function M.apply(mode)
     vim.notify(("theme: unknown mode %q"):format(tostring(mode)), vim.log.levels.WARN)
     return
   end
+  M._gen = M._gen + 1
   vim.o.background = mode
   local scheme = M.schemes[mode]
   local ok, err = pcall(vim.cmd.colorscheme, scheme)
@@ -155,15 +156,35 @@ function M.toggle()
   M.apply(M.mode() == "dark" and "light" or "dark")
 end
 
---- Read the macOS appearance and apply it.
+-- Last macOS appearance we observed. sync() follows the system only when THIS
+-- changes -- not merely when it differs from the editor -- so a manual :Theme
+-- toggle isn't undone by the next FocusGained.
+M._system = nil
+
+-- Bumped by every apply(). A sync() callback that started before a manual
+-- switch is stale by the time it resolves and must not clobber it.
+M._gen = 0
+
+--- Read the macOS appearance and follow it.
 --- Async (vim.system) so FocusGained never blocks on the subprocess.
-function M.sync()
+---@param force boolean|nil apply even if the system value hasn't changed
+function M.sync(force)
   if vim.fn.has("mac") == 0 then return end
+  local gen = M._gen
   vim.system({ "defaults", "read", "-g", "AppleInterfaceStyle" }, { text = true }, function(res)
     -- macOS only writes AppleInterfaceStyle when Dark; absent means Light.
     local dark = res.code == 0 and (res.stdout or ""):lower():find("dark") ~= nil
     local mode = dark and "dark" or "light"
     vim.schedule(function()
+      local prev = M._system
+      M._system = mode
+
+      -- System unchanged since we last looked: leave a manual choice alone.
+      if not force and prev ~= nil and prev == mode then return end
+
+      -- Raced with a manual switch while the subprocess was running.
+      if not force and M._gen ~= gen then return end
+
       if mode ~= M.mode() then M.apply(mode) end
     end)
   end)
@@ -181,7 +202,7 @@ function M.setup()
     if arg == "toggle" then
       M.toggle()
     elseif arg == "system" then
-      M.sync()
+      M.sync(true) -- explicit request: re-follow the system even if unchanged
     elseif arg == "light" or arg == "dark" then
       M.apply(arg)
     else
