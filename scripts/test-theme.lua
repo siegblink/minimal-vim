@@ -115,6 +115,37 @@ for mode, groups in pairs(expect) do
 	end
 end
 
+-- Switching must not leave groups behind from the previous scheme. night-owl
+-- doesn't `highlight clear` on the :colorscheme path, so without theme.lua
+-- doing it, anything catppuccin defines and night-owl doesn't survives.
+--
+-- NormalNC is the regression that prompted this: Neovim paints non-current
+-- windows with it, so with the cursor in neo-tree the editor kept catppuccin's
+-- light background even though Normal was correctly dark. A single-window
+-- check cannot see that -- the only window is always the current one.
+local function bg_of(group)
+	return vim.api.nvim_get_hl(0, { name = group })["bg"]
+end
+
+theme.apply("light")
+local light_normal = bg_of("Normal")
+theme.apply("dark")
+local dark_normal = bg_of("Normal")
+
+for _, group in ipairs({ "NormalNC", "NormalFloat", "SignColumn", "Pmenu" }) do
+	local got = bg_of(group)
+	-- Nothing may still be wearing the light scheme's Normal background.
+	check(("dark: %s does not retain the light bg"):format(group), got ~= light_normal, true)
+end
+
+check("light and dark Normal actually differ", light_normal ~= dark_normal, true)
+
+-- And the same in reverse.
+theme.apply("light")
+for _, group in ipairs({ "NormalNC", "NormalFloat", "SignColumn", "Pmenu" }) do
+	check(("light: %s does not retain the dark bg"):format(group), bg_of(group) ~= dark_normal, true)
+end
+
 if failures > 0 then
 	print(failures .. " test(s) failed")
 	os.exit(1)

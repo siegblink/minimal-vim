@@ -126,6 +126,22 @@ function M.apply(mode)
   M._gen = M._gen + 1
   vim.o.background = mode
   local scheme = M.schemes[mode]
+
+  -- Colourschemes are expected to `highlight clear` on load, but night-owl.nvim
+  -- doesn't on this path: colors/night-owl.lua calls theme.set_highlights()
+  -- directly, while the clear lives in its config.setup(), which :colorscheme
+  -- never reaches. Without an explicit clear, every group catppuccin defines
+  -- and night-owl does not survives the switch.
+  --
+  -- NormalNC is the one that bites: Neovim paints *non-current* windows with
+  -- it, and night-owl never defines it. Switching to dark with the cursor in
+  -- neo-tree left the editor window on catppuccin's light background while
+  -- Normal, the statusline and the tree were all correctly dark.
+  vim.cmd("highlight clear")
+  if vim.fn.exists("syntax_on") == 1 then
+    vim.cmd("syntax reset")
+  end
+
   local ok, err = pcall(vim.cmd.colorscheme, scheme)
   if not ok then
     vim.notify(("theme: colorscheme %q failed: %s"):format(scheme, err), vim.log.levels.ERROR)
