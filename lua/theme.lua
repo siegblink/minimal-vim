@@ -201,7 +201,15 @@ function M.sync(force)
       -- Raced with a manual switch while the subprocess was running.
       if not force and M._gen ~= gen then return end
 
-      if mode ~= M.mode() then M.apply(mode) end
+      -- 'background' alone is NOT evidence that a scheme is loaded.
+      -- night-owl's plugin setup() sets background=dark and g:colors_name
+      -- without ever applying highlights -- those only land when
+      -- colors/night-owl.lua is sourced. So on a dark system this used to see
+      -- "already dark, nothing to do", skip apply(), and leave the editor on
+      -- Neovim's cleared defaults. Check the actual scheme too.
+      if force or mode ~= M.mode() or vim.g.colors_name ~= M.schemes[mode] then
+        M.apply(mode)
+      end
     end)
   end)
 end
@@ -240,8 +248,10 @@ function M.setup()
     callback = function() M.sync() end,
   })
 
-  -- Initial state: whatever macOS is set to right now.
-  M.sync()
+  -- Initial state: whatever macOS is set to right now. force=true so startup
+  -- always loads a scheme -- there is nothing sensible to leave in place, and
+  -- skipping here is what left the editor on Neovim's defaults.
+  M.sync(true)
 end
 
 return M

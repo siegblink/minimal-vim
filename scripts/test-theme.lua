@@ -146,6 +146,34 @@ for _, group in ipairs({ "NormalNC", "NormalFloat", "SignColumn", "Pmenu" }) do
 	check(("light: %s does not retain the dark bg"):format(group), bg_of(group) ~= dark_normal, true)
 end
 
+-- Startup regression: 'background' matching the target mode is NOT evidence
+-- that a colourscheme is loaded. night-owl's plugin setup() sets
+-- background=dark and g:colors_name without applying any highlights -- those
+-- only land when colors/night-owl.lua is sourced. sync() used to skip apply()
+-- whenever the mode already matched, so starting Neovim on a dark system left
+-- the editor sitting on Neovim's cleared defaults.
+for _, mode in ipairs({ "light", "dark" }) do
+	vim.cmd("highlight clear")
+	vim.o.background = mode -- mode already "matches"...
+	vim.g.colors_name = nil -- ...but nothing is actually loaded
+	theme.apply(mode)
+	check(("recovers a missing scheme in %s"):format(mode), vim.g.colors_name, theme.schemes[mode])
+	check(("%s: Normal is not Neovim's default"):format(mode), bg_of("Normal") ~= 0x14161b, true)
+end
+
+-- The startup entry point must land on a real scheme even when 'background'
+-- ALREADY equals the system mode -- that is precisely the startup condition,
+-- since night-owl's setup() has already set background=dark by this point.
+-- Setting background to anything else here would make this test vacuous: the
+-- old guard would pass on the mismatch alone. (Verified by mutation.)
+vim.cmd("highlight clear")
+vim.o.background = sys -- already matches what the system will report
+vim.g.colors_name = nil -- yet nothing is loaded
+theme.sync(true)
+settle()
+check("forced sync loads a scheme when background already matches",
+	vim.g.colors_name, theme.schemes[sys])
+
 if failures > 0 then
 	print(failures .. " test(s) failed")
 	os.exit(1)
