@@ -42,6 +42,16 @@ M.palette = {
     bl_indicator = "#82aaff",
     bl_modified = "#c5e478",
     bl_duplicate_sel = "#7fdbca",
+
+    -- ANSI palette for :terminal buffers, identical to the Ghostty theme of
+    -- the same name so a TUI renders the same inside the editor and outside
+    -- it. See the light half for why this has to be set per mode.
+    term = {
+      "#011627", "#EF5350", "#22da6e", "#addb67",
+      "#82aaff", "#c792ea", "#21c7a8", "#ffffff",
+      "#575656", "#ef5350", "#22da6e", "#ffeb95",
+      "#82aaff", "#c792ea", "#7fdbca", "#ffffff",
+    },
   },
 
   -- Shares #f2f2f3 with the Ghostty theme, so the editor and the terminal
@@ -64,6 +74,28 @@ M.palette = {
     bl_indicator = "#2153b8",
     bl_modified = "#2f751f",
     bl_duplicate_sel = "#146e73",
+
+    -- MUST be set per mode. catppuccin runs with term_colors = false and
+    -- night-owl never clears these, so before this existed a switch to light
+    -- left night-owl's DARK ANSI palette in place: ANSI yellow stayed
+    -- #ffd602, which is 1.77:1 on the float background -- lazygit's ahead
+    -- markers and git's commit line were effectively unreadable.
+    --
+    -- Derived from Ghostty's "Night Owlish Light", darkened where that palette
+    -- fails WCAG AA against the float background (#e8e8ec, the harder of the
+    -- two light grounds). 12 of 16 slots failed; hue is preserved throughout.
+    -- Base slots target 5.6:1 and bright slots 4.6:1, so a bright stays
+    -- visibly brighter than its base twin instead of collapsing into it --
+    -- a flat target merged 2/10 into one colour.
+    --
+    -- Slots 0, 7 and 15 are left alone: in a light palette those are
+    -- structural (backgrounds, light-on-dark foregrounds), not body text.
+    term = {
+      "#011627", "#b11d22", "#00665e", "#7e5100",
+      "#2b56b2", "#403f53", "#006844", "#7a8181",
+      "#626869", "#bb373d", "#00746c", "#7c6500",
+      "#1a6ca5", "#5e658d", "#007744", "#989fb1",
+    },
   },
 }
 
@@ -81,6 +113,12 @@ end
 function M.highlights()
   local c = M.colors()
   local hl = function(g, o) vim.api.nvim_set_hl(0, g, o) end
+
+  -- Terminal ANSI. Only picked up by terminal buffers opened AFTER this runs,
+  -- so an already-open lazygit keeps the old palette until reopened.
+  for i, colour in ipairs(c.term) do
+    vim.g["terminal_color_" .. (i - 1)] = colour
+  end
 
   -- All floats share the editor's float background; plugins inherit for free.
   hl("NormalFloat", { bg = c.float_bg, fg = c.float_fg })
