@@ -51,6 +51,29 @@ return {
     input = { enabled = true },
     git = { enabled = true },
     lazygit = {
+      -- snacks generates its own lazygit config and appends it to
+      -- LG_CONFIG_FILE, so it overrides ~/.config/lazygit/config.yml whenever
+      -- lazygit is opened from inside Neovim. Every key is therefore repointed
+      -- at a Lazygit* group owned by lua/theme.lua, which carries the same
+      -- values the standalone config uses -- otherwise the same lazygit looks
+      -- different inside and outside the editor.
+      --
+      -- The defaults this replaces were not merely different, two were wrong:
+      -- selectedLineBgColor mapped to Visual, whose `bg` sometimes resolved as
+      -- absent, and snacks then wrote the key with NO value, so the selected
+      -- commit had no highlight at all; activeBorderColor mapped to MatchParen,
+      -- which is orange in the light half against the standalone config's blue.
+      theme = {
+        activeBorderColor = { fg = "LazygitActiveBorder", bold = true },
+        inactiveBorderColor = { fg = "LazygitInactiveBorder" },
+        searchingActiveBorderColor = { fg = "LazygitSearchingBorder", bold = true },
+        optionsTextColor = { fg = "LazygitOptionsText" },
+        selectedLineBgColor = { fg = "LazygitSelectedLine" },
+        cherryPickedCommitFgColor = { fg = "LazygitCherryPickedFg" },
+        cherryPickedCommitBgColor = { fg = "LazygitCherryPickedBg" },
+        unstagedChangesColor = { fg = "LazygitUnstaged" },
+        defaultFgColor = { fg = "LazygitDefaultFg" },
+      },
       win = {
         position = "float",
         border = "rounded",

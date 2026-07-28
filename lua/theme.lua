@@ -43,6 +43,20 @@ M.palette = {
     bl_modified = "#c5e478",
     bl_duplicate_sel = "#7fdbca",
 
+    -- lazygit, via snacks. Keep in step with set_lazygit() in
+    -- dotfiles/dot_scripts/executable_theme -- that config serves the
+    -- standalone TUI, these groups serve the one snacks opens, and they must
+    -- agree or the same lazygit looks different inside and outside the editor.
+    lg_active = "#88a3d9",
+    lg_inactive = "#4b6479",
+    lg_searching = "#d2b189",
+    lg_options = "#80908f",
+    lg_selected = "#1d3b53",
+    lg_cherry_fg = "#88a3d9",
+    lg_cherry_bg = "#1d3b53",
+    lg_unstaged = "#c07a73",
+    lg_default_fg = "#b5bcc5",
+
     -- ANSI palette for :terminal buffers, identical to the Ghostty theme of
     -- the same name so a TUI renders the same inside the editor and outside
     -- it. See the light half for why this has to be set per mode.
@@ -74,6 +88,16 @@ M.palette = {
     bl_indicator = "#2153b8",
     bl_modified = "#2f751f",
     bl_duplicate_sel = "#146e73",
+
+    lg_active = "#2153b8",
+    lg_inactive = "#696e84",
+    lg_searching = "#96631b",
+    lg_options = "#696e84",
+    lg_selected = "#bfd6ee",
+    lg_cherry_fg = "#2153b8",
+    lg_cherry_bg = "#bfd6ee",
+    lg_unstaged = "#a51d3a",
+    lg_default_fg = "#403f53",
 
     -- MUST be set per mode. catppuccin runs with term_colors = false and
     -- night-owl never clears these, so before this existed a switch to light
@@ -119,6 +143,27 @@ function M.highlights()
   for i, colour in ipairs(c.term) do
     vim.g["terminal_color_" .. (i - 1)] = colour
   end
+
+  -- Groups that exist purely so snacks can resolve lazygit's theme from them
+  -- (see lua/plugins/snacks.lua). snacks generates its own lazygit config and
+  -- appends it to LG_CONFIG_FILE, so it overrides ~/.config/lazygit/config.yml
+  -- inside the editor -- pointing it here is what keeps the two in agreement.
+  --
+  -- Each carries its colour in `fg`, including the selection: snacks' get_color
+  -- just emits whichever channel it is told to read, and lazygit decides what
+  -- the value means. Its default mapped selectedLineBgColor at Visual, whose
+  -- `bg` it sometimes resolved as absent -- get_color then returns an empty
+  -- list and the key is written with NO value, which lazygit reads as "no
+  -- highlight". That is why the selected commit had no background at all.
+  hl("LazygitActiveBorder", { fg = c.lg_active })
+  hl("LazygitInactiveBorder", { fg = c.lg_inactive })
+  hl("LazygitSearchingBorder", { fg = c.lg_searching })
+  hl("LazygitOptionsText", { fg = c.lg_options })
+  hl("LazygitSelectedLine", { fg = c.lg_selected })
+  hl("LazygitCherryPickedFg", { fg = c.lg_cherry_fg })
+  hl("LazygitCherryPickedBg", { fg = c.lg_cherry_bg })
+  hl("LazygitUnstaged", { fg = c.lg_unstaged })
+  hl("LazygitDefaultFg", { fg = c.lg_default_fg })
 
   -- All floats share the editor's float background; plugins inherit for free.
   hl("NormalFloat", { bg = c.float_bg, fg = c.float_fg })
