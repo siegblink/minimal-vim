@@ -1,11 +1,16 @@
 -- Central light/dark switch.
 --
--- macOS appearance is the single source of truth for the whole terminal stack:
+-- The desktop appearance is the single source of truth for the whole terminal
+-- stack -- macOS System Settings, or the GNOME color-scheme on Linux:
 --   Ghostty  follows it natively (theme = light:...,dark:... in its config)
 --   delta    follows via `git config --global delta.features night-owl-{light,dark}`
 --   lazygit  inherits delta's colours
 --   Neovim   follows via this module
 -- `~/.scripts/theme` flips all of them at once.
+--
+-- This module is shared by both machines, so it must never assume macOS.
+-- detect_cmd() below dispatches per platform, and sync() still lands on a
+-- scheme when no detector exists at all.
 --
 -- Colours this config sets by hand -- floats, neo-tree, bufferline -- live in
 -- M.palette so there is exactly one place to edit per mode. They are re-applied
@@ -172,7 +177,7 @@ function M.toggle()
   M.apply(M.mode() == "dark" and "light" or "dark")
 end
 
--- Last macOS appearance we observed. sync() follows the system only when THIS
+-- Last system appearance we observed. sync() follows the system only when THIS
 -- changes -- not merely when it differs from the editor -- so a manual :Theme
 -- toggle isn't undone by the next FocusGained.
 M._system = nil
@@ -181,14 +186,44 @@ M._system = nil
 -- switch is stale by the time it resolves and must not clobber it.
 M._gen = 0
 
---- Read the macOS appearance and follow it.
+--- The command that reports the desktop appearance on this platform, or nil if
+--- we don't know how to ask. Both detectors report dark by the presence of
+--- "dark" in stdout, so one parse rule covers them.
+---
+---   macOS  `defaults` only writes AppleInterfaceStyle when Dark; absent = Light
+---   GNOME  `gsettings` reports 'prefer-dark' / 'prefer-light' / 'default'
+---@return string[]|nil
+local function detect_cmd()
+  if vim.fn.has("mac") == 1 then
+    return { "defaults", "read", "-g", "AppleInterfaceStyle" }
+  end
+  if vim.fn.executable("gsettings") == 1 then
+    return { "gsettings", "get", "org.gnome.desktop.interface", "color-scheme" }
+  end
+  return nil
+end
+
+--- Read the system appearance and follow it.
 --- Async (vim.system) so FocusGained never blocks on the subprocess.
 ---@param force boolean|nil apply even if the system value hasn't changed
 function M.sync(force)
-  if vim.fn.has("mac") == 0 then return end
+  local cmd = detect_cmd()
   local gen = M._gen
-  vim.system({ "defaults", "read", "-g", "AppleInterfaceStyle" }, { text = true }, function(res)
-    -- macOS only writes AppleInterfaceStyle when Dark; absent means Light.
+
+  -- No detector: headless, a non-GNOME desktop, an unknown platform. There is
+  -- nothing to follow, but returning here is how the editor ends up with no
+  -- scheme at all -- which is strictly worse than picking one. Note we cannot
+  -- test `vim.g.colors_name` to decide whether that already happened:
+  -- night-owl's plugin setup() sets it (and 'background') WITHOUT applying any
+  -- highlights, so it reads "night-owl" while Neovim renders its own defaults.
+  -- Same trap as cd0545dd. Only a forced call lands a scheme; an unforced one
+  -- (FocusGained) has nothing to follow and harmlessly does nothing.
+  if not cmd then
+    if force then M.apply(M.mode()) end
+    return
+  end
+
+  vim.system(cmd, { text = true }, function(res)
     local dark = res.code == 0 and (res.stdout or ""):lower():find("dark") ~= nil
     local mode = dark and "dark" or "light"
     vim.schedule(function()

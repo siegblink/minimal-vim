@@ -48,13 +48,38 @@ local function other(m)
 	return m == "dark" and "light" or "dark"
 end
 
--- Whatever macOS currently says is the baseline for every case below.
+--- Read the desktop appearance WITHOUT going through theme.lua, so the check
+--- below is independent of the code under test.
+local function system_mode()
+	local cmd
+	if vim.fn.has("mac") == 1 then
+		cmd = { "defaults", "read", "-g", "AppleInterfaceStyle" }
+	elseif vim.fn.executable("gsettings") == 1 then
+		cmd = { "gsettings", "get", "org.gnome.desktop.interface", "color-scheme" }
+	else
+		return nil
+	end
+	return vim.fn.system(cmd):lower():find("dark") and "dark" or "light"
+end
+
+-- Whatever the desktop currently says is the baseline for every case below.
+local truth = system_mode()
 theme.sync(true)
 settle()
 local sys = theme.mode()
 print("(system appearance detected as: " .. sys .. ")")
 
-check("sync(force) follows the system", theme.mode(), sys)
+-- Compare against an INDEPENDENT reading, not against theme.mode() itself.
+-- This assertion used to be `check(..., theme.mode(), sys)` where sys had just
+-- been assigned from theme.mode() -- i.e. it compared a value to itself and
+-- passed even when sync() did nothing at all. That is precisely how the
+-- non-macOS bail shipped: on Linux sync() returned immediately, no scheme was
+-- ever applied, and the whole suite still went green.
+if truth then
+	check("sync(force) follows the real system appearance", sys, truth)
+else
+	print("(no appearance detector on this platform -- follow check skipped)")
+end
 
 -- The reported bug: a manual toggle must outlive both the in-flight startup
 -- sync() and any number of focus events.
@@ -173,6 +198,38 @@ theme.sync(true)
 settle()
 check("forced sync loads a scheme when background already matches",
 	vim.g.colors_name, theme.schemes[sys])
+
+-- Cross-platform regression: sync() used to bail on every non-macOS platform,
+-- so on Linux nothing ever applied a scheme and the editor rendered Neovim's
+-- built-in defaults.
+--
+-- g:colors_name is NOT a usable check here. night-owl's plugin setup() sets it
+-- (and 'background') without applying any highlights, so on a broken Linux
+-- start it reads "night-owl" while Normal is still #14161b -- looks themed,
+-- renders unthemed. Assert what is actually on screen.
+vim.cmd("highlight clear")
+vim.g.colors_name = nil
+theme.sync(true)
+settle()
+check("forced sync renders real highlights, not Neovim's defaults",
+	bg_of("Normal") ~= 0x14161b, true)
+check("forced sync lands one of our schemes",
+	vim.g.colors_name == theme.schemes.dark or vim.g.colors_name == theme.schemes.light, true)
+
+-- With no detector at all, a forced sync must STILL land a scheme -- returning
+-- early is what leaves the editor blank. Unforced calls have nothing to follow
+-- and must not thrash the user's manual choice.
+local real_exec = vim.fn.executable
+local real_has = vim.fn.has
+vim.fn.executable = function(n) return n == "gsettings" and 0 or real_exec(n) end
+vim.fn.has = function(f) return f == "mac" and 0 or real_has(f) end
+vim.cmd("highlight clear")
+vim.g.colors_name = nil
+theme.sync(true)
+settle(100)
+check("no detector: forced sync still applies a scheme",
+	bg_of("Normal") ~= 0x14161b, true)
+vim.fn.executable, vim.fn.has = real_exec, real_has
 
 if failures > 0 then
 	print(failures .. " test(s) failed")
