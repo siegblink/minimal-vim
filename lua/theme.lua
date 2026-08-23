@@ -32,6 +32,9 @@ M.palette = {
     float_title = "#7fdbca",
     lsp_border = "#82aaff",
     neotree_cursorline = "#1d3b53",
+    -- Same value night-owl resolves Visual to; pinned so the selection colour
+    -- is deterministic rather than inherited from whichever scheme loaded.
+    visual = "#1d3b53",
 
     bl_fill = "#010d18",
     bl_inactive_bg = "#01111d",
@@ -78,6 +81,13 @@ M.palette = {
     float_title = "#146e73",
     lsp_border = "#2153b8",
     neotree_cursorline = "#dbe7f0",
+    -- Catppuccin's own Visual is stock latte surface1 (#bcc0cc) -- the one
+    -- selection surface the WCAG retune never covered, a low-chroma grey at
+    -- ~1.6:1 on the #f2f2f3 base that reads as "no highlight" depending on
+    -- screen and lighting. Pinned to the house selection blue instead: the
+    -- exact value lazygit's selectedLineBgColor and fzf's bg+ already use, so
+    -- a Visual selection, a lazygit row and an fzf row are one colour.
+    visual = "#bfd6ee",
 
     bl_fill = "#e2e2e7",
     bl_inactive_bg = "#eaeaee",
@@ -178,6 +188,12 @@ function M.highlights()
   hl("LspFloatBorder", { bg = c.float_bg, fg = c.lsp_border })
 
   hl("NeoTreeCursorLine", { bg = c.neotree_cursorline, bold = true })
+
+  -- Visual-mode selection. Both colourschemes define this, but catppuccin's is
+  -- stock latte surface1 -- see M.palette.light.visual for why that failed in
+  -- practice. Owned here so both halves get the same treatment and the value
+  -- stays in step with the lazygit/fzf selection colours it mirrors.
+  hl("Visual", { bg = c.visual })
 
   -- bufferline reads these groups directly, so setting them here means the
   -- tabline re-colours on switch without re-running bufferline.setup().

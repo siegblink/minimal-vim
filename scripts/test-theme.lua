@@ -121,11 +121,11 @@ end
 local expect = {
 	light = {
 		NormalFloat = "bg", LspFloatBorder = "fg",
-		NeoTreeCursorLine = "bg", BufferLineFill = "bg",
+		NeoTreeCursorLine = "bg", BufferLineFill = "bg", Visual = "bg",
 	},
 	dark = {
 		NormalFloat = "bg", LspFloatBorder = "fg",
-		NeoTreeCursorLine = "bg", BufferLineFill = "bg",
+		NeoTreeCursorLine = "bg", BufferLineFill = "bg", Visual = "bg",
 	},
 }
 for mode, groups in pairs(expect) do
@@ -135,6 +135,7 @@ for mode, groups in pairs(expect) do
 		local want = tonumber(theme.palette[mode][({
 			NormalFloat = "float_bg", LspFloatBorder = "lsp_border",
 			NeoTreeCursorLine = "neotree_cursorline", BufferLineFill = "bl_fill",
+			Visual = "visual",
 		})[group]]:sub(2), 16)
 		check(("%s: %s.%s"):format(mode, group, key), got, want)
 	end
