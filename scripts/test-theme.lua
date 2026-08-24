@@ -1,9 +1,9 @@
 -- Tests for lua/theme.lua.
 -- Run: nvim --headless -c 'luafile scripts/test-theme.lua'
 --
--- NOT `nvim -l`, unlike test-tsgo-cmd.lua: `-l` skips init.lua, so lazy never
--- runs and neither colourscheme is on the runtimepath. That test only touches a
--- pure module; this one needs the real plugin environment.
+-- NOT `nvim -l`: `-l` skips init.lua, so lazy never runs and neither
+-- colourscheme is on the runtimepath. This test needs the real plugin
+-- environment.
 --
 -- Regression cover for the bug where a manual `:Theme toggle` was silently
 -- undone. sync() used to apply the system mode whenever it differed from the

@@ -26,12 +26,12 @@ return {
 			vim.lsp.config.cssls = {
 				capabilities = capabilities,
 			}
-			vim.lsp.config.tsgo = {
+			-- TypeScript 7 native LSP (Mason package `tsc`). Everything beyond
+			-- capabilities comes from upstream nvim-lspconfig's lsp/tsc.lua:
+			-- binary resolution (project-local vs $PATH, version-gated >= 7),
+			-- Deno detection, and a clean no-attach when no TS7 binary exists.
+			vim.lsp.config.tsc = {
 				capabilities = capabilities,
-				cmd = function(dispatchers, config)
-					local argv = require("tsgo-cmd").resolve((config or {}).root_dir)
-					return vim.lsp.rpc.start(argv, dispatchers)
-				end,
 			}
 			vim.lsp.config.lua_ls = {
 				capabilities = capabilities,
@@ -41,7 +41,7 @@ return {
 			}
 
 			-- Enable all configured servers
-			vim.lsp.enable({ "html", "cssls", "tsgo", "lua_ls", "pylsp" })
+			vim.lsp.enable({ "html", "cssls", "tsc", "lua_ls", "pylsp" })
 
 			local lsp_float_opts = {
 				border = "rounded",
