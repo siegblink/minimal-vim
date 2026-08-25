@@ -141,6 +141,47 @@ for mode, groups in pairs(expect) do
 	end
 end
 
+-- The palette value landing in the group is necessary but not sufficient: a
+-- selection colour can be applied correctly and still be imperceptible.
+-- #bfd6ee passed every check above while rendering as "no highlight" on a
+-- matte sRGB panel -- 1.33:1 luminance contrast against the light base,
+-- relying entirely on blue chroma that wide-gamut Mac displays exaggerate.
+-- Assert a luminance-contrast floor so neither machine can reintroduce an
+-- invisible selection.
+local function luminance(rgb)
+	local function channel(c)
+		c = c / 255
+		if c <= 0.04045 then
+			return c / 12.92
+		end
+		return ((c + 0.055) / 1.055) ^ 2.4
+	end
+	local r = channel(math.floor(rgb / 65536) % 256)
+	local g = channel(math.floor(rgb / 256) % 256)
+	local b = channel(rgb % 256)
+	return 0.2126 * r + 0.7152 * g + 0.0722 * b
+end
+
+local function contrast(a, b)
+	local la, lb = luminance(a), luminance(b)
+	if la < lb then
+		la, lb = lb, la
+	end
+	return (la + 0.05) / (lb + 0.05)
+end
+
+for _, mode in ipairs({ "light", "dark" }) do
+	theme.apply(mode)
+	local normal_bg = vim.api.nvim_get_hl(0, { name = "Normal", link = false }).bg
+	local visual_bg = vim.api.nvim_get_hl(0, { name = "Visual", link = false }).bg
+	local ratio = contrast(visual_bg, normal_bg)
+	check(
+		("%s: Visual is perceptible against Normal (%.2f:1, floor 1.5:1)"):format(mode, ratio),
+		ratio >= 1.5,
+		true
+	)
+end
+
 -- Switching must not leave groups behind from the previous scheme. night-owl
 -- doesn't `highlight clear` on the :colorscheme path, so without theme.lua
 -- doing it, anything catppuccin defines and night-owl doesn't survives.

@@ -56,8 +56,8 @@ local STANDALONE = {
 	light = {
 		activeBorderColor = "#2153b8", inactiveBorderColor = "#696e84",
 		searchingActiveBorderColor = "#96631b", optionsTextColor = "#696e84",
-		selectedLineBgColor = "#bfd6ee", cherryPickedCommitFgColor = "#2153b8",
-		cherryPickedCommitBgColor = "#bfd6ee", unstagedChangesColor = "#a51d3a",
+		selectedLineBgColor = "#96bce6", cherryPickedCommitFgColor = "#2153b8",
+		cherryPickedCommitBgColor = "#96bce6", unstagedChangesColor = "#a51d3a",
 		defaultFgColor = "#403f53",
 	},
 }

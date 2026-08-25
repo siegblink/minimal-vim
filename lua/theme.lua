@@ -84,10 +84,15 @@ M.palette = {
     -- Catppuccin's own Visual is stock latte surface1 (#bcc0cc) -- the one
     -- selection surface the WCAG retune never covered, a low-chroma grey at
     -- ~1.6:1 on the #f2f2f3 base that reads as "no highlight" depending on
-    -- screen and lighting. Pinned to the house selection blue instead: the
-    -- exact value lazygit's selectedLineBgColor and fzf's bg+ already use, so
-    -- a Visual selection, a lazygit row and an fzf row are one colour.
-    visual = "#bfd6ee",
+    -- screen and lighting. The first pin, #bfd6ee (the lazygit/fzf selection
+    -- blue of the time), was WORSE: 1.33:1, all of its contrast in chroma the
+    -- MacBook's wide-gamut panel exaggerates -- on the Linux machine's sRGB
+    -- monitor the selection was invisible. Same hue, darkened to 1.77:1 so
+    -- luminance alone carries it on any panel; selected text stays >= 5:1.
+    -- test-theme.lua asserts a 1.5:1 floor. lazygit's selectedLineBgColor and
+    -- fzf's bg+ (chezmoi dotfiles) mirror THIS value, so a Visual selection,
+    -- a lazygit row and an fzf row are one colour.
+    visual = "#96bce6",
 
     bl_fill = "#e2e2e7",
     bl_inactive_bg = "#eaeaee",
@@ -103,9 +108,9 @@ M.palette = {
     lg_inactive = "#696e84",
     lg_searching = "#96631b",
     lg_options = "#696e84",
-    lg_selected = "#bfd6ee",
+    lg_selected = "#96bce6",
     lg_cherry_fg = "#2153b8",
-    lg_cherry_bg = "#bfd6ee",
+    lg_cherry_bg = "#96bce6",
     lg_unstaged = "#a51d3a",
     lg_default_fg = "#403f53",
 
