@@ -147,9 +147,35 @@ function M.colors()
   return M.palette[M.mode()]
 end
 
+-- night-owl.nvim's after/plugin/autocmds.lua registers global FocusGained /
+-- FocusLost autocmds that `hi! link Visual @nowl.visual.{active,inactive}`
+-- (a dim-selection-on-blur feature). Its load-time guard always passes here:
+-- night-owl's setup() sets g:colors_name = "night-owl" before the async
+-- sync() lands a scheme, so the autocmds are registered no matter which mode
+-- the editor ends up in. A link SHADOWS the group's own attributes, so every
+-- alt-tab undid the pinned Visual: in dark the link target exists (and
+-- happens to match the pin, which is why dark looked fine); in light the
+-- `highlight clear` in apply() wiped the @nowl groups, so Visual resolved to
+-- NOTHING and the selection rendered invisible -- while nvim_get_hl still
+-- reported the pinned bg in the raw definition. Deleting the autocmds (not
+-- just re-pinning) is the fix; theme.lua owns Visual in both modes.
+-- Runs from highlights() because the after/plugin file is sourced late in
+-- startup -- after setup() -- but always before the async first apply().
+local function strip_visual_focus_hijack()
+  for _, event in ipairs({ "FocusGained", "FocusLost" }) do
+    for _, au in ipairs(vim.api.nvim_get_autocmds({ event = event })) do
+      if (au.command or ""):find("@nowl%.visual") then
+        vim.api.nvim_del_autocmd(au.id)
+      end
+    end
+  end
+end
+
 -- Highlights the colourschemes don't set for us. Runs on ColorScheme, so both
 -- night-owl and catppuccin get the same treatment.
 function M.highlights()
+  strip_visual_focus_hijack()
+
   local c = M.colors()
   local hl = function(g, o) vim.api.nvim_set_hl(0, g, o) end
 

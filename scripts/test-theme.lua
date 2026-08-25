@@ -182,6 +182,45 @@ for _, mode in ipairs({ "light", "dark" }) do
 	)
 end
 
+-- night-owl.nvim ships after/plugin/autocmds.lua with global FocusGained /
+-- FocusLost autocmds that `hi! link Visual @nowl.visual.{active,inactive}`.
+-- The link shadows theme.lua's pinned bg. In dark the target group exists so
+-- it happens to look right; in light the `highlight clear` in apply() wiped
+-- the @nowl groups, so the first alt-tab makes the selection resolve to
+-- NOTHING -- Visual keeps its bg in the raw definition but renders empty.
+-- theme.lua must delete those autocmds. Register an identical hijacker here
+-- so the test is deterministic even if the plugin's guard didn't fire in this
+-- environment, then check a focus cycle can no longer break either mode.
+vim.api.nvim_create_autocmd("FocusGained", {
+	pattern = "*",
+	command = "hi! link Visual @nowl.visual.active",
+})
+vim.api.nvim_create_autocmd("FocusLost", {
+	pattern = "*",
+	command = "hi! link Visual @nowl.visual.inactive",
+})
+
+for _, mode in ipairs({ "light", "dark" }) do
+	theme.apply(mode)
+	vim.cmd("doautocmd FocusLost")
+	vim.cmd("doautocmd FocusGained")
+	local resolved = vim.api.nvim_get_hl(0, { name = "Visual", link = false })
+	local want = tonumber(theme.palette[mode].visual:sub(2), 16)
+	check(("%s: Visual survives a focus cycle"):format(mode), resolved.bg, want)
+	local raw = vim.api.nvim_get_hl(0, { name = "Visual" })
+	check(("%s: Visual carries no link after focus cycle"):format(mode), raw.link, nil)
+end
+
+for _, ev in ipairs({ "FocusGained", "FocusLost" }) do
+	local leftover = 0
+	for _, au in ipairs(vim.api.nvim_get_autocmds({ event = ev })) do
+		if (au.command or ""):find("@nowl%.visual") then
+			leftover = leftover + 1
+		end
+	end
+	check(("no @nowl.visual %s autocmds survive"):format(ev), leftover, 0)
+end
+
 -- Switching must not leave groups behind from the previous scheme. night-owl
 -- doesn't `highlight clear` on the :colorscheme path, so without theme.lua
 -- doing it, anything catppuccin defines and night-owl doesn't survives.
