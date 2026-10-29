@@ -35,6 +35,10 @@ if nvm_node_bin then
   vim.env.PATH = nvm_node_bin .. ":" .. vim.env.PATH
 end
 
+-- Node is here for LSPs only. No remote plugins use the Node provider, and it
+-- would need the global `neovim` npm package, so turn it off.
+vim.g.loaded_node_provider = 0
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
