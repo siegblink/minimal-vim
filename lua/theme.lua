@@ -403,7 +403,10 @@ function M.setup()
     desc = "Switch colourscheme: light | dark | toggle | system",
   })
 
-  vim.keymap.set("n", "<leader>tt", function() M.toggle() end,
+  -- <leader>T, not <leader>tt: <leader>t toggles the snacks terminal, and any
+  -- longer mapping that starts with it makes Neovim wait 'timeoutlen' (1s by
+  -- default) for a second key before the terminal opens.
+  vim.keymap.set("n", "<leader>T", function() M.toggle() end,
     { silent = true, desc = "Toggle light/dark theme" })
 
   -- Flipping macOS appearance (or running `theme` in a shell) updates Neovim
