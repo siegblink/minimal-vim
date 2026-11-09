@@ -9,9 +9,10 @@ return {
 	{
 		"williamboman/mason-lspconfig.nvim",
 		lazy = false,
-		opts = {
-			auto_install = true,
-		},
+		-- v2 knobs are only `ensure_installed` and `automatic_enable` (default
+		-- true: every Mason-installed server is enabled). The old
+		-- `auto_install = true` was not a v2 option and did nothing.
+		opts = {},
 	},
 	{
 		"neovim/nvim-lspconfig",
@@ -39,9 +40,37 @@ return {
 			vim.lsp.config.pylsp = {
 				capabilities = capabilities,
 			}
+			-- C/C++ (Mason package `clangd`; Mason has no Linux arm64 build, so
+			-- there the distro clangd on $PATH is used). Formatting (<leader>gf)
+			-- is clangd's built-in clang-format, the same split as rust-analyzer
+			-- driving rustfmt, so none-ls has no C source. Style: the nearest
+			-- .clang-format, else LLVM. Compile flags come from the project's
+			-- compile_commands.json or compile_flags.txt; fallbackFlags apply only
+			-- to files with neither (single-file programs) so those still get the
+			-- warnings a real -Wall -Wextra build would print.
+			vim.lsp.config.clangd = {
+				capabilities = capabilities,
+				init_options = {
+					fallbackFlags = { "-Wall", "-Wextra" },
+				},
+			}
 
 			-- Enable all configured servers
-			vim.lsp.enable({ "html", "cssls", "tsc", "lua_ls", "pylsp" })
+			vim.lsp.enable({ "html", "cssls", "tsc", "lua_ls", "pylsp", "clangd" })
+
+			-- clangd: inlay hints on by default (<leader>ci toggles, see
+			-- after/ftplugin/c.lua). Parameter-name hints expose swapped
+			-- arguments, e.g. memset(buf, sizeof buf, 0) labels the size as the
+			-- fill byte.
+			vim.api.nvim_create_autocmd("LspAttach", {
+				group = vim.api.nvim_create_augroup("clangd-attach", { clear = true }),
+				callback = function(args)
+					local client = vim.lsp.get_client_by_id(args.data.client_id)
+					if client and client.name == "clangd" then
+						vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
+					end
+				end,
+			})
 
 			local lsp_float_opts = {
 				border = "rounded",

@@ -8,6 +8,12 @@ vim.cmd("set softtabstop=2")
 vim.cmd("set shiftwidth=2")
 vim.g.mapleader = " "
 
+-- Detect .h headers as C, not Neovim's default C++, so C headers get C
+-- highlighting and ftplugins. clangd picks the language on its own: with no
+-- compile_commands.json or compile_flags.txt it parses a lone .h as
+-- Objective-C++ whatever the filetype, so C projects need a compile_flags.txt.
+vim.g.c_syntax_for_h = true
+
 -- Navigate vim panes better
 vim.keymap.set("n", "<c-k>", ":wincmd k<CR>")
 vim.keymap.set("n", "<c-j>", ":wincmd j<CR>")

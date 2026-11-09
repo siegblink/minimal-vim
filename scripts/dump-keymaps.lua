@@ -29,7 +29,7 @@ local DEFAULT_DOC = HOME .. "/.commands/nvim-commands.md"
 local ORDER = {
   "vim-options.lua", "bufferline.lua", "neo-tree.lua", "snacks.lua",
   "lsp-config.lua", "none-ls.lua", "trouble.lua", "completions.lua",
-  "debugging.lua", "rustaceanvim.lua", "crates.lua", "markdown-preview.lua",
+  "debugging.lua", "rustaceanvim.lua", "crates.lua", "c.lua", "markdown-preview.lua",
 }
 local LABEL = {
   ["vim-options.lua"]      = "Core / Window / Editor",
@@ -43,12 +43,14 @@ local LABEL = {
   ["debugging.lua"]        = "Debugging (nvim-dap)",
   ["rustaceanvim.lua"]     = "Rust (rustaceanvim)",
   ["crates.lua"]           = "Cargo.toml Dependencies (crates.nvim)",
+  ["c.lua"]                = "C / C++ (after/ftplugin/c.lua)",
   ["markdown-preview.lua"] = "Markdown",
 }
 local SCOPE = {
   ["completions.lua"]      = "insert mode",
   ["rustaceanvim.lua"]     = "buffer-local · .rs files",
   ["crates.lua"]           = "buffer-local · Cargo.toml",
+  ["c.lua"]                = "buffer-local · C/C++ files",
   ["markdown-preview.lua"] = "markdown files",
   ["neo-tree.lua"]         = "some maps act inside the Neo-tree window",
 }

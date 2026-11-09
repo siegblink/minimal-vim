@@ -7,15 +7,10 @@ return {
   config = function()
     local config = require("nvim-treesitter.configs")
     config.setup({
-      -- ensure_installed = {
-      --   "lua",
-      --   "html",
-      --   "css",
-      --   "javascript",
-      --   "typescript",
-      --   "json",
-      --   "bash",
-      -- },
+      -- auto_install fetches the parser for a buffer's own filetype, never for
+      -- languages injected into it. C's queries inject printf (format
+      -- specifiers in printf/scanf strings) and doxygen (/** */ comments).
+      ensure_installed = { "printf", "doxygen" },
       auto_install = true,
       highlight = { enable = true, disable = { "markdown", "markdown_inline", "html" } },
       indent = { enable = true },
