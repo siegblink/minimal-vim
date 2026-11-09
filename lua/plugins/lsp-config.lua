@@ -14,7 +14,7 @@ return {
 		-- `auto_install = true` was not a v2 option and did nothing.
 		-- stylua is excluded: the Mason stylua package is the binary none-ls
 		-- formats Lua with, and enabled as a server it would be a second Lua
-		-- formatter (see the lua_ls note below).
+		-- formatter (see no_formatting below).
 		opts = {
 			automatic_enable = { exclude = { "stylua" } },
 		},
@@ -25,6 +25,20 @@ return {
 		config = function()
 			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
+			-- One formatter per language: its none-ls source (stylua, black,
+			-- prettier). <leader>gf is vim.lsp.buf.format(), which runs EVERY
+			-- attached client that can format, in client-start order, so a
+			-- server's own formatter races the none-ls one and whichever runs last
+			-- decides the style (lua_ls re-indents stylua's tabs to spaces; it,
+			-- pylsp's autopep8/yapf and tsc all keep 'single' quotes). Dropping the
+			-- capability in on_init means Neovim never asks these servers to
+			-- format, whatever their settings or a project's .luarc.json say.
+			-- scripts/test-formatters.lua checks this.
+			local function no_formatting(client)
+				client.server_capabilities.documentFormattingProvider = false
+				client.server_capabilities.documentRangeFormattingProvider = false
+			end
+
 			-- Configure each LSP server
 			vim.lsp.config.html = {
 				capabilities = capabilities,
@@ -33,28 +47,21 @@ return {
 				capabilities = capabilities,
 			}
 			-- TypeScript 7 native LSP (Mason package `tsc`). Everything beyond
-			-- capabilities comes from upstream nvim-lspconfig's lsp/tsc.lua:
-			-- binary resolution (project-local vs $PATH, version-gated >= 7),
-			-- Deno detection, and a clean no-attach when no TS7 binary exists.
+			-- capabilities and the formatting opt-out comes from upstream
+			-- nvim-lspconfig's lsp/tsc.lua: binary resolution (project-local vs
+			-- $PATH, version-gated >= 7), Deno detection, and a clean no-attach
+			-- when no TS7 binary exists.
 			vim.lsp.config.tsc = {
 				capabilities = capabilities,
+				on_init = no_formatting,
 			}
-			-- Formatting off: none-ls stylua is the Lua formatter. <leader>gf runs
-			-- every client that can format, in client-start order, and lua_ls's
-			-- built-in one (EmmyLuaCodeStyle) disagrees with stylua: it keeps
-			-- 'single' quotes and re-indents tabs to spaces. With both enabled,
-			-- whichever runs last decides the style. scripts/test-formatters.lua
-			-- checks this.
 			vim.lsp.config.lua_ls = {
 				capabilities = capabilities,
-				settings = {
-					Lua = {
-						format = { enable = false },
-					},
-				},
+				on_init = no_formatting,
 			}
 			vim.lsp.config.pylsp = {
 				capabilities = capabilities,
+				on_init = no_formatting,
 			}
 			-- C/C++ (Mason package `clangd`; Mason has no Linux arm64 build, so
 			-- there the distro clangd on $PATH is used). Formatting (<leader>gf)

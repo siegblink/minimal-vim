@@ -34,7 +34,7 @@ Key plugins configured:
 ## Language Servers
 
 Configured LSPs via Mason:
-- lua_ls (Lua) — its built-in formatter is off (`settings.Lua.format.enable = false`); none-ls stylua formats Lua (see Formatters).
+- lua_ls (Lua)
 - tsc (TypeScript/JavaScript) — TypeScript 7 native LSP, replaces ts_ls. Mason package `tsc` (the stable `typescript` npm package, successor to the deprecated `tsgo` preview). All launch/resolution logic comes from upstream nvim-lspconfig's `lsp/tsc.lua`: project-local `node_modules/.bin/{tsc,tsgo}` vs `$PATH`, candidates version-gated on `--version` >= 7, Deno projects skipped (denols territory), clean no-attach when nothing qualifies. JS diagnostics are enabled (the old ts_ls per-buffer disable was intentionally dropped).
 - html, cssls (Web)
 - pylsp (Python)
@@ -45,11 +45,13 @@ Configured LSPs via Mason:
 ## Formatters
 
 Configured via none-ls:
-- stylua (Lua) — the only Lua formatter. `<leader>gf` is `vim.lsp.buf.format()`, which runs *every* attached client that can format, in client-start order (not fixed between sessions), so a second formatter is a race, not a backup: lua_ls's built-in formatter (EmmyLuaCodeStyle) re-indented stylua's tabs to spaces and kept single quotes whenever it ran last. Hence lua_ls formatting is off, and mason-lspconfig's `automatic_enable` excludes `stylua` — the Mason package none-ls runs, which would otherwise also start as a stylua LSP server. Tests: `nvim --headless -c 'luafile scripts/test-formatters.lua'`.
+- stylua (Lua)
 - black (Python)
 - prettier (JSON, JS/TS/JSX/TSX)
 - rustfmt (Rust) — via rust-analyzer (not none-ls). Runs automatically on save for `.rs` files only (buffer-local `BufWritePre` autocmd in `rustaceanvim.lua`).
 - clang-format (C/C++) — via clangd's built-in formatter (not none-ls), the same split as rustfmt: a none-ls `clang_format` source would mean a second formatter and a second LSP client on every C buffer. Manual `<leader>gf` only, no format-on-save — C has no single house style, and the code you open is often someone else's. Style: the nearest `.clang-format`, else LLVM.
+
+**One formatter per language.** `<leader>gf` is `vim.lsp.buf.format()`, which runs *every* attached client that can format, in client-start order (not fixed between sessions), so a second formatter is a race, not a backup: whichever runs last decides the style. lua_ls, pylsp (its autopep8/yapf plugins) and tsc each ship a formatter that disagrees with their none-ls one (lua_ls re-indented stylua's tabs to spaces; all three keep single quotes), so `lsp-config.lua` drops their formatting capability in `on_init` (`no_formatting`). Neovim then never asks them, whatever their settings or a project's `.luarc.json` say, and `gq` (the LSP `formatexpr`) uses the none-ls source too; their diagnostics, hover and completion are unaffected. mason-lspconfig's `automatic_enable` also excludes `stylua`: it is the Mason package none-ls runs, and would otherwise start as a stylua LSP server as well. Tests: `nvim --headless -c 'luafile scripts/test-formatters.lua'`.
 
 ## File Locations
 
