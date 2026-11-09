@@ -12,7 +12,12 @@ return {
 		-- v2 knobs are only `ensure_installed` and `automatic_enable` (default
 		-- true: every Mason-installed server is enabled). The old
 		-- `auto_install = true` was not a v2 option and did nothing.
-		opts = {},
+		-- stylua is excluded: the Mason stylua package is the binary none-ls
+		-- formats Lua with, and enabled as a server it would be a second Lua
+		-- formatter (see the lua_ls note below).
+		opts = {
+			automatic_enable = { exclude = { "stylua" } },
+		},
 	},
 	{
 		"neovim/nvim-lspconfig",
@@ -34,8 +39,19 @@ return {
 			vim.lsp.config.tsc = {
 				capabilities = capabilities,
 			}
+			-- Formatting off: none-ls stylua is the Lua formatter. <leader>gf runs
+			-- every client that can format, in client-start order, and lua_ls's
+			-- built-in one (EmmyLuaCodeStyle) disagrees with stylua: it keeps
+			-- 'single' quotes and re-indents tabs to spaces. With both enabled,
+			-- whichever runs last decides the style. scripts/test-formatters.lua
+			-- checks this.
 			vim.lsp.config.lua_ls = {
 				capabilities = capabilities,
+				settings = {
+					Lua = {
+						format = { enable = false },
+					},
+				},
 			}
 			vim.lsp.config.pylsp = {
 				capabilities = capabilities,
