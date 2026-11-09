@@ -409,14 +409,14 @@ function M.setup()
   vim.keymap.set("n", "<leader>T", function() M.toggle() end,
     { silent = true, desc = "Toggle light/dark theme" })
 
-  -- Flipping macOS appearance (or running `theme` in a shell) updates Neovim
-  -- the moment it regains focus.
+  -- Flipping the system appearance (or running `theme` in a shell) updates
+  -- Neovim the moment it regains focus.
   vim.api.nvim_create_autocmd("FocusGained", {
     group = vim.api.nvim_create_augroup("theme_follow_system", { clear = true }),
     callback = function() M.sync() end,
   })
 
-  -- Initial state: whatever macOS is set to right now. force=true so startup
+  -- Initial state: whatever the system is set to now. force=true so startup
   -- always loads a scheme -- there is nothing sensible to leave in place, and
   -- skipping here is what left the editor on Neovim's defaults.
   M.sync(true)

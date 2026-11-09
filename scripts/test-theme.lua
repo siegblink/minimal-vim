@@ -11,8 +11,8 @@
 -- flight -- would revert the toggle. It followed the system on every check
 -- rather than only when the system itself changed.
 --
--- Reads the real macOS appearance and reasons relative to it, so the test is
--- valid in either mode.
+-- Reads the real system appearance (macOS, or GNOME's color-scheme on Linux)
+-- and reasons relative to it, so the test is valid in either mode.
 local ok_mod, theme = pcall(require, "theme")
 if not ok_mod then
 	print("FAIL: could not require theme: " .. tostring(theme))
