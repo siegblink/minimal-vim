@@ -135,8 +135,34 @@ local function bufmap(lhs)
 	local m = vim.fn.maparg(lhs, "n", false, true)
 	return (m.buffer == 1 and m.callback) and m or nil
 end
-for _, lhs in ipairs({ "<leader>cm", "<leader>ch", "<leader>ci" }) do
+local C_MAPS = { "<leader>cm", "<leader>ch", "<leader>ci" }
+for _, lhs in ipairs(C_MAPS) do
 	check(("%s is mapped buffer-locally in C buffers"):format(lhs), bufmap(lhs) ~= nil)
+end
+
+-- Leaving the filetype runs b:undo_ftplugin, which must remove every map. For
+-- C++, cpp.vim sources c.lua and then appends ' | setl commentstring<', and a
+-- map command reads the space before a '|' as part of its {lhs}
+-- (:help map-trailing-white), so a bare `nunmap` there silently misses.
+-- `doautocmd filetypeplugin` runs just the real ftplugin chain: the full
+-- FileType event would also start treesitter's auto_install (C++ parser).
+local function c_maps_here()
+	return vim.tbl_filter(function(lhs) return bufmap(lhs) ~= nil end, C_MAPS)
+end
+for _, ft in ipairs({ "c", "cpp" }) do
+	local scratch = vim.api.nvim_create_buf(false, true)
+	local entered, left
+	vim.api.nvim_buf_call(scratch, function()
+		vim.cmd("doautocmd <nomodeline> filetypeplugin FileType " .. ft)
+		entered = c_maps_here()
+		vim.cmd("doautocmd <nomodeline> filetypeplugin FileType text")
+		left = c_maps_here()
+	end)
+	vim.api.nvim_buf_delete(scratch, { force = true })
+	check(("leaving %s removes the C maps (b:undo_ftplugin)"):format(ft),
+		#entered == #C_MAPS and #left == 0,
+		("mapped on entering: %s; still mapped after leaving: %s (after/ftplugin/c.lua)")
+			:format(table.concat(entered, " "), table.concat(left, " ")))
 end
 
 -- <leader>cm on `printf` must open the C library page, not the shell command's.

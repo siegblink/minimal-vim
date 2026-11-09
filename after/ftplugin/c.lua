@@ -38,6 +38,10 @@ vim.keymap.set("n", "<leader>cm", man_under_cursor, { buffer = true, desc = "C: 
 vim.keymap.set("n", "<leader>ch", switch_source_header, { buffer = true, desc = "C: switch source/header" })
 vim.keymap.set("n", "<leader>ci", toggle_inlay_hints, { buffer = true, desc = "C: toggle inlay hints" })
 
-local undo = "silent! nunmap <buffer> <leader>cm | silent! nunmap <buffer> <leader>ch"
-	.. " | silent! nunmap <buffer> <leader>ci"
+-- Each unmap goes through `exe`: a map command reads the space before a '|'
+-- as part of its {lhs} (:help map-trailing-white), so `nunmap <buffer> x |`
+-- tries to unmap "x " and silently misses. That includes the last one, since
+-- cpp.vim appends ' | setl commentstring<' after sourcing this file.
+local undo = 'silent! exe "nunmap <buffer> <leader>cm" | silent! exe "nunmap <buffer> <leader>ch"'
+	.. ' | silent! exe "nunmap <buffer> <leader>ci"'
 vim.b.undo_ftplugin = vim.b.undo_ftplugin and (vim.b.undo_ftplugin .. " | " .. undo) or undo
