@@ -24,7 +24,7 @@ Key plugins configured:
 - C/C++ development via clangd (`lsp-config.lua`), a codelldb launch config (`debugging.lua`) and buffer-local keymaps in `after/ftplugin/c.lua` (also sourced for C++): `<leader>cm` man page for the word under the cursor (sections 2, then 3, then 1, so `printf` opens printf(3), not the shell command), `<leader>ch` switch source/header, `<leader>ci` toggle inlay hints. `.h` files are filetype `c` (`vim.g.c_syntax_for_h` in `vim-options.lua`). Tests: `nvim --headless -c 'luafile scripts/test-c-setup.lua'`.
 - File explorer via neo-tree (`neo-tree.lua`)
 - Git integration via gitsigns (`git-signs.lua`)
-- Auto-completion via nvim-cmp (`completions.lua`)
+- Auto-completion via nvim-cmp (`completions.lua`). `<Tab>`/`<S-Tab>` jump between snippet placeholders (e.g. the function arguments clangd fills in) only while the cursor is inside the snippet (LuaSnip `locally_jumpable`); anywhere else Tab stays a plain Tab. Menu navigation stays on `<C-n>`/`<C-p>`. `scripts/test-c-setup.lua` checks this with real keystrokes in a child nvim on a pty.
 - Syntax highlighting via treesitter (`treesitter.lua`; plugin vendored at `vendor/nvim-treesitter/`). `auto_install` fetches a buffer's own language only, never injected ones, so `ensure_installed` lists just those: `printf` (format strings in C) and `doxygen`.
 - Status line via lualine (`lualine.lua`)
 - UI enhancements via noice and snacks (`noice.lua`, `snacks.lua`)

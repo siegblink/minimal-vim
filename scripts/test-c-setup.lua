@@ -1,7 +1,8 @@
 -- Tests for the C/C++ setup: clangd (lsp-config.lua) with its fallback
 -- warnings, formatting and inlay hints; .h detection (vim-options.lua); the
--- keymaps in after/ftplugin/c.lua; the printf injection (treesitter.lua); and
--- the codelldb adapter + launch config (debugging.lua).
+-- keymaps in after/ftplugin/c.lua; the printf injection (treesitter.lua);
+-- Tab/S-Tab placeholder jumps (completions.lua); and the codelldb adapter +
+-- launch config (debugging.lua).
 --
 -- Run: nvim --headless -c 'luafile scripts/test-c-setup.lua'
 -- Add a live debug session (compiles a program, stops at a breakpoint):
@@ -245,6 +246,57 @@ if clangd ~= "" then
 				analysed and herrs[1] and herrs[1].message or "clangd never published diagnostics for util.h")
 		end
 	end
+end
+
+-- Snippet placeholders: <Tab> / <S-Tab> (completions.lua) --------------------
+-- Real keystrokes: a child nvim in a pty expands a two-argument snippet (what
+-- clangd sends when you accept a function), fills it using Tab and S-Tab, then
+-- presses Tab outside the snippet, where it must stay a plain Tab.
+do
+	local file = write("jump/t.txt", { "" })
+	local expand = [[<Cmd>lua require('luasnip').lsp_expand('copy(${1:dst}, ${2:src})')<CR>]]
+	local screen = ""
+	local job = vim.fn.jobstart({ vim.v.progpath, "-i", "NONE", "-c", "inoremap <C-]> " .. expand, file }, {
+		pty = true,
+		width = 100,
+		height = 30,
+		env = { TERM = "xterm-256color" },
+		on_stdout = function(_, data)
+			screen = screen .. table.concat(data, "")
+		end,
+	})
+	local function send(keys)
+		vim.fn.chansend(job, keys)
+		vim.wait(300, function() return false end)
+	end
+	vim.wait(15000, function() return screen:find("t.txt", 1, true) ~= nil end, 100)
+	vim.wait(1000, function() return false end)
+	send("i")
+	send("\29") -- <C-]>: expand, "dst" is selected
+	send("buf")
+	send("\t") -- next placeholder: "src"
+	send("name")
+	send("\t") -- end of the snippet
+	send(";")
+	send("\t") -- outside the snippet: a plain Tab (2 spaces)
+	send("X")
+	send("\27") -- <Esc>
+	send("o")
+	send("\29")
+	send("A")
+	send("\t")
+	send("B")
+	send("\27[Z") -- <S-Tab>: back to the first placeholder
+	send("Z")
+	send("\27")
+	send(":wq\r")
+	if vim.fn.jobwait({ job }, 10000)[1] == -1 then
+		vim.fn.jobstop(job)
+	end
+	local got = vim.fn.readfile(dir .. "/jump/t.txt")
+	check("<Tab>/<S-Tab> jump between snippet placeholders, plain Tab elsewhere",
+		got[1] == "copy(buf, name);  X" and got[2] == "copy(Z, B)",
+		"got: " .. vim.inspect(got) .. " (completions.lua <Tab>/<S-Tab> mappings)")
 end
 
 -- DAP: codelldb adapter + C launch config -----------------------------------
